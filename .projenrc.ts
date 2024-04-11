@@ -4,8 +4,10 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   defaultReleaseBranch: 'main',
   name: 'warmpool-test',
   projenrcTs: true,
-
-  // deps: [],                /* Runtime dependencies of this module. */
+  github: false,
+  deps: [
+    '@pandanus-cloud/cdk-autoscaling-warmpool',
+  ] /* Runtime dependencies of this module. */,
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */

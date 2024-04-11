@@ -1,23 +1,35 @@
-import { App, Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
+import { AsgStack } from './AsgStack';
+import { LoadBalancerStack } from './LoadBalancerStack';
+import { VpcStack } from './VpcStack';
 
-export class MyStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
+const app = new cdk.App();
 
-    // define resources here...
-  }
-}
+// Define VPC Stack
+const baseVpc = new VpcStack(app, 'baseVpc', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
 
-// for development, use account/region from cdk cli
-const devEnv = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION,
-};
+// Define Application Load Balancer Stack
+const loadBalancer = new LoadBalancerStack(app, 'loadBalancer', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+  vpc: baseVpc.vpc,
+});
 
-const app = new App();
-
-new MyStack(app, 'warmpool-test-dev', { env: devEnv });
-// new MyStack(app, 'warmpool-test-prod', { env: prodEnv });
+// Define AutoScaling Group
+new AsgStack(app, 'asg', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+  vpc: baseVpc.vpc,
+  albTg: loadBalancer.albTg,
+});
 
 app.synth();
